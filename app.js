@@ -133,7 +133,7 @@ function showView(name) {
   document.getElementById("btn-back").classList.toggle("hidden", name === "home");
 }
 
-function openLearn(mode, rangeIdx = 0) {
+function openLearn(mode, pageIdx = 0) {
   currentMode = mode;
   const titles = { huruf: "🔤 Mengenal Huruf", angka: "🔢 Mengenal Angka", hewan: "🐘 Dunia Hewan", warna: "🎨 Mengenal Warna" };
   document.getElementById("header-title").innerText = titles[mode];
@@ -141,30 +141,51 @@ function openLearn(mode, rangeIdx = 0) {
   const grid = document.getElementById("cards-grid");
 
   let rangeWrap = document.getElementById("angka-range-tabs");
-  if (!rangeWrap) {
-    rangeWrap = document.createElement("div");
-    rangeWrap.id = "angka-range-tabs";
-    rangeWrap.className = "range-tabs";
-    grid.parentNode.insertBefore(rangeWrap, grid);
+  if (rangeWrap) rangeWrap.remove();
+
+  let pagerWrap = document.getElementById("angka-pager-bar");
+  if (!pagerWrap) {
+    pagerWrap = document.createElement("div");
+    pagerWrap.id = "angka-pager-bar";
+    pagerWrap.className = "pager-bar";
+    grid.parentNode.appendChild(pagerWrap);
   }
-  rangeWrap.innerHTML = "";
+  pagerWrap.innerHTML = "";
+  pagerWrap.style.display = "none";
+
   let list = allList;
-
   if (mode === "angka") {
-    const ranges = [[1, 20], [21, 40], [41, 60], [61, 80], [81, 100]];
-    ranges.forEach((r, idx) => {
-      const tb = document.createElement("button");
-      tb.className = "range-btn" + (idx === rangeIdx ? " active" : "");
-      tb.innerText = `${r[0]}–${r[1]}`;
-      tb.onclick = () => openLearn("angka", idx);
-      rangeWrap.appendChild(tb);
-    });
-    const [awal, akhir] = ranges[rangeIdx];
-    list = allList.slice(awal - 1, akhir);
+    const perPage = 15;
+    const totalPages = Math.ceil(allList.length / perPage);
+    const safePage = Math.max(0, Math.min(pageIdx, totalPages - 1));
+    const start = safePage * perPage;
+    const end = Math.min(start + perPage, allList.length);
+    list = allList.slice(start, end);
+
+    pagerWrap.style.display = "flex";
+    const btnPrev = document.createElement("button");
+    btnPrev.className = "pager-btn";
+    btnPrev.innerText = lang === "id" ? "◀ Sebelumnya" : "◀ Prev";
+    btnPrev.disabled = safePage === 0;
+    btnPrev.onclick = () => openLearn("angka", safePage - 1);
+
+    const info = document.createElement("span");
+    info.className = "pager-info";
+    info.innerText = `${start + 1}–${end} (${safePage + 1}/${totalPages})`;
+
+    const btnNext = document.createElement("button");
+    btnNext.className = "pager-btn";
+    btnNext.innerText = lang === "id" ? "Selanjutnya ▶" : "Next ▶";
+    btnNext.disabled = safePage >= totalPages - 1;
+    btnNext.onclick = () => openLearn("angka", safePage + 1);
+
+    pagerWrap.appendChild(btnPrev);
+    pagerWrap.appendChild(info);
+    pagerWrap.appendChild(btnNext);
   }
 
-  const setSpot = (item) => {
-    playTone(620, "triangle", 0.14);
+  const setSpot = (item, silent = false) => {
+    if (!silent) playTone(620, "triangle", 0.14);
     const spotEl = document.getElementById("spot-visual");
     if (item.isAngka) {
       if (item.num <= 10) {
@@ -185,11 +206,12 @@ function openLearn(mode, rangeIdx = 0) {
                   (lang === "id" ? item.id : item.en);
     document.getElementById("spot-title").innerText = judul;
     const infoBawah = item.isAngka ? (lang === "id" ? item.subId : item.subEn) :
-                      (item.sfx ? `Suara: ${item.sfx}` : (lang === "id" ? "Ketuk kartu lain di bawah!" : "Tap another card below!"));
+                      (item.sfx ? `Suara: ${item.sfx}` : (lang === "id" ? "Ketuk kartu di bawah!" : "Tap a card below!"));
     document.getElementById("spot-sub").innerText = infoBawah;
     const ucapId = mode === "huruf" ? `${item.k}... ${item.id}` : mode === "angka" ? `${item.id}` : item.id;
     const ucapEn = mode === "huruf" ? `${item.k}... ${item.en}` : mode === "angka" ? `${item.en}` : item.en;
-    speakText(ucapId, ucapEn);
+    lastSpoken = { id: ucapId, en: ucapEn };
+    if (!silent) speakText(ucapId, ucapEn);
   };
 
   grid.innerHTML = "";
@@ -199,28 +221,31 @@ function openLearn(mode, rangeIdx = 0) {
     if (item.hex) btn.style.borderColor = item.hex;
     const ikonKartu = (lang === "en" && item.icoEn) ? item.icoEn : item.ico;
     btn.innerHTML = `<span class="ic-top">${mode === "huruf" || mode === "angka" ? item.k : ikonKartu}</span><strong>${mode === "huruf" ? ikonKartu + " " + (lang === "id" ? item.id : item.en) : (lang === "id" ? item.id : item.en)}</strong>`;
-    btn.onclick = () => setSpot(item);
+    btn.onclick = () => setSpot(item, false);
     grid.appendChild(btn);
   });
 
   showView("learn");
-  setSpot(list[0]);
+  setSpot(list, true);
 }
 
 function startQuiz() {
   currentMode = "kuis";
   document.getElementById("header-title").innerText = "⭐ Tebak Ceria";
   showView("quiz");
-  nextQuestion();
+  nextQuestion(true);
 }
 
-function nextQuestion() {
+function nextQuestion(silent = false) {
   const pool = [...DATA.hewan, ...DATA.warna];
   const acak = pool.sort(() => Math.random() - 0.5).slice(0, 4);
   currentAnswer = acak[Math.floor(Math.random() * acak.length)];
   const namaTarget = lang === "id" ? currentAnswer.id : currentAnswer.en;
   document.getElementById("quiz-prompt").innerText = lang === "id" ? `Yang mana ${namaTarget}?` : `Which one is ${namaTarget}?`;
-  speakText(`Yang mana ${currentAnswer.id}?`, `Which one is ${currentAnswer.en}?`);
+  const soalId = `Yang mana ${currentAnswer.id}?`;
+  const soalEn = `Which one is ${currentAnswer.en}?`;
+  lastSpoken = { id: soalId, en: soalEn };
+  if (!silent) speakText(soalId, soalEn);
 
   const optBox = document.getElementById("quiz-options");
   optBox.innerHTML = "";
@@ -231,17 +256,21 @@ function nextQuestion() {
     b.onclick = () => {
       if (item === currentAnswer) {
         document.querySelectorAll(".quiz-opt").forEach(el => el.style.pointerEvents = "none");
-        b.style.background = "#dcfce7";
-        b.style.borderColor = "#16a34a";
+        b.classList.remove("opt-wrong");
+        b.classList.add("opt-correct");
         score += 10;
         document.getElementById("quiz-score").innerText = score;
         playWinMelody();
         setTimeout(() => {
-          speakText("Yeeey! Pintar sekali!", "Yay! You are so smart!", nextQuestion);
+          speakText("Yeeey! Pintar sekali!", "Yay! You are so smart!", () => nextQuestion(false));
         }, 420);
       } else {
+        b.classList.remove("opt-wrong");
+        void b.offsetWidth;
+        b.classList.add("opt-wrong");
         playTone(220, "sawtooth", 0.22);
         speakText("Ups, coba lagi ya!", "Oops, try again!");
+        setTimeout(() => b.classList.remove("opt-wrong"), 850);
       }
     };
     optBox.appendChild(b);
@@ -263,7 +292,7 @@ document.getElementById("btn-lang").onclick = function() {
   lang = lang === "id" ? "en" : "id";
   this.innerText = lang === "id" ? "🇮🇩 ID" : "🇬🇧 EN";
   playTone(700);
-  if (currentMode === "kuis") nextQuestion();
+  if (currentMode === "kuis") nextQuestion(false);
   else if (currentMode !== "home") openLearn(currentMode);
   else speakText("Bahasa Indonesia aktif", "English mode active");
 };
