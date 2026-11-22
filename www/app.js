@@ -64,7 +64,7 @@ function playTone(freq = 520, type = "sine", dur = 0.15) {
   } catch (e) {}
 }
 
-async async function speakText(textId, textEn, onDone) {
+async function speakText(textId, textEn, onDone) {
   lastSpoken = { id: textId, en: textEn || textId };
   const teks = lang === "id" ? textId : (textEn || textId);
   const kodeBahasa = lang === "id" ? "id-ID" : "en-US";
