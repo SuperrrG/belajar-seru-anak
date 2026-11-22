@@ -33,11 +33,37 @@ const DATA = {
     { k: "Y", ico: "🪀", icoEn: "🪀", id: "Yoyo", en: "Yoyo" },
     { k: "Z", ico: "🦓", icoEn: "🦓", id: "Zebra", en: "Zebra" }
   ],
-  angka: Array.from({ length: 20 }, (_, i) => {
+  angka: Array.from({ length: 100 }, (_, i) => {
     const n = i + 1;
-    const namaId = ["Satu","Dua","Tiga","Empat","Lima","Enam","Tujuh","Delapan","Sembilan","Sepuluh","Sebelas","Dua Belas","Tiga Belas","Empat Belas","Lima Belas","Enam Belas","Tujuh Belas","Delapan Belas","Sembilan Belas","Dua Puluh"][i];
-    const namaEn = ["One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen","Twenty"][i];
-    return { k: String(n), ico: "⭐".repeat(n), isAngka: true, id: namaId, en: namaEn };
+    const satId = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan"];
+    const satEn = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
+    const belasEn = ["Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+    const puluhEn = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+
+    let namaId = "";
+    if (n < 10) namaId = satId[n];
+    else if (n === 10) namaId = "Sepuluh";
+    else if (n === 11) namaId = "Sebelas";
+    else if (n < 20) namaId = satId[n - 10] + " Belas";
+    else if (n === 100) namaId = "Seratus";
+    else {
+      const p = Math.floor(n / 10), s = n % 10;
+      namaId = satId[p] + " Puluh" + (s ? " " + satId[s] : "");
+    }
+
+    let namaEn = "";
+    if (n < 10) namaEn = satEn[n];
+    else if (n < 20) namaEn = belasEn[n - 10];
+    else if (n === 100) namaEn = "One Hundred";
+    else {
+      const p = Math.floor(n / 10), s = n % 10;
+      namaEn = puluhEn[p] + (s ? "-" + satEn[s] : "");
+    }
+
+    const p = Math.floor(n / 10), s = n % 10;
+    const subId = n <= 10 ? `Hitung ada ${n} apel!` : (n === 100 ? "1 Ratusan (10 Puluhan)" : `${p} Puluhan + ${s} Satuan`);
+    const subEn = n <= 10 ? `Count ${n} apples!` : (n === 100 ? "1 Hundred (10 Tens)" : `${p} Tens + ${s} Ones`);
+    return { k: String(n), num: n, isAngka: true, id: namaId, en: namaEn, subId, subEn };
   }),
   hewan: [
     { k: "Kucing", ico: "🐱", id: "Kucing. Meong meong!", en: "Cat. Meow meow!", sfx: "Meong!" },
@@ -107,23 +133,60 @@ function showView(name) {
   document.getElementById("btn-back").classList.toggle("hidden", name === "home");
 }
 
-function openLearn(mode) {
+function openLearn(mode, rangeIdx = 0) {
   currentMode = mode;
   const titles = { huruf: "🔤 Mengenal Huruf", angka: "🔢 Mengenal Angka", hewan: "🐘 Dunia Hewan", warna: "🎨 Mengenal Warna" };
   document.getElementById("header-title").innerText = titles[mode];
-  const list = DATA[mode];
+  const allList = DATA[mode];
   const grid = document.getElementById("cards-grid");
+
+  let rangeWrap = document.getElementById("angka-range-tabs");
+  if (!rangeWrap) {
+    rangeWrap = document.createElement("div");
+    rangeWrap.id = "angka-range-tabs";
+    rangeWrap.className = "range-tabs";
+    grid.parentNode.insertBefore(rangeWrap, grid);
+  }
+  rangeWrap.innerHTML = "";
+  let list = allList;
+
+  if (mode === "angka") {
+    const ranges = [[1, 20], [21, 40], [41, 60], [61, 80], [81, 100]];
+    ranges.forEach((r, idx) => {
+      const tb = document.createElement("button");
+      tb.className = "range-btn" + (idx === rangeIdx ? " active" : "");
+      tb.innerText = `${r[0]}–${r[1]}`;
+      tb.onclick = () => openLearn("angka", idx);
+      rangeWrap.appendChild(tb);
+    });
+    const [awal, akhir] = ranges[rangeIdx];
+    list = allList.slice(awal - 1, akhir);
+  }
 
   const setSpot = (item) => {
     playTone(620, "triangle", 0.14);
     const spotEl = document.getElementById("spot-visual");
-    spotEl.style.fontSize = item.isAngka ? (Number(item.k) > 10 ? "24px" : (Number(item.k) > 5 ? "30px" : "42px")) : "62px";
-    const ikonAktif = (lang === "en" && item.icoEn) ? item.icoEn : item.ico; spotEl.innerText = ikonAktif;
+    if (item.isAngka) {
+      if (item.num <= 10) {
+        spotEl.style.fontSize = item.num > 5 ? "28px" : "38px";
+        spotEl.innerText = "🍎".repeat(item.num);
+      } else {
+        spotEl.style.fontSize = "56px";
+        spotEl.innerHTML = `<span class="big-num-badge">${item.num}</span>`;
+      }
+    } else {
+      spotEl.style.fontSize = "62px";
+      const ikonAktif = (lang === "en" && item.icoEn) ? item.icoEn : item.ico;
+      spotEl.innerText = ikonAktif;
+    }
+
     const judul = mode === "huruf" ? `${item.k} — ${lang === "id" ? item.id : item.en}` :
                   mode === "angka" ? `${item.k} (${lang === "id" ? item.id : item.en})` :
                   (lang === "id" ? item.id : item.en);
     document.getElementById("spot-title").innerText = judul;
-    document.getElementById("spot-sub").innerText = item.sfx ? `Suara: ${item.sfx}` : "Ketuk kartu lain di bawah!";
+    const infoBawah = item.isAngka ? (lang === "id" ? item.subId : item.subEn) :
+                      (item.sfx ? `Suara: ${item.sfx}` : (lang === "id" ? "Ketuk kartu lain di bawah!" : "Tap another card below!"));
+    document.getElementById("spot-sub").innerText = infoBawah;
     const ucapId = mode === "huruf" ? `${item.k}... ${item.id}` : mode === "angka" ? `${item.id}` : item.id;
     const ucapEn = mode === "huruf" ? `${item.k}... ${item.en}` : mode === "angka" ? `${item.en}` : item.en;
     speakText(ucapId, ucapEn);
@@ -134,7 +197,8 @@ function openLearn(mode) {
     const btn = document.createElement("button");
     btn.className = "item-card";
     if (item.hex) btn.style.borderColor = item.hex;
-    btn.innerHTML = `<span class="ic-top">${mode === "huruf" || mode === "angka" ? item.k : item.ico}</span><strong>${mode === "huruf" ? ((lang === "en" && item.icoEn) ? item.icoEn : item.ico) + " " + (lang === "id" ? item.id : item.en) : (lang === "id" ? item.id : item.en)}</strong>`;
+    const ikonKartu = (lang === "en" && item.icoEn) ? item.icoEn : item.ico;
+    btn.innerHTML = `<span class="ic-top">${mode === "huruf" || mode === "angka" ? item.k : ikonKartu}</span><strong>${mode === "huruf" ? ikonKartu + " " + (lang === "id" ? item.id : item.en) : (lang === "id" ? item.id : item.en)}</strong>`;
     btn.onclick = () => setSpot(item);
     grid.appendChild(btn);
   });
