@@ -64,22 +64,39 @@ function playTone(freq = 520, type = "sine", dur = 0.15) {
   } catch (e) {}
 }
 
-function speakText(textId, textEn, onDone) {
+async function speakText(textId, textEn, onDone) {
   lastSpoken = { id: textId, en: textEn || textId };
-  if (!("speechSynthesis" in window)) {
-    if (onDone) setTimeout(onDone, 1800);
-    return;
+  const teks = lang === "id" ? textId : (textEn || textId);
+  const kodeBahasa = lang === "id" ? "id-ID" : "en-US";
+  const capTTS = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.TextToSpeech;
+
+  if (capTTS) {
+    try {
+      await capTTS.stop().catch(() => {});
+      await capTTS.speak({ text: teks, lang: kodeBahasa, rate: 1.05, pitch: 1.48, volume: 1.0 });
+      if (onDone) setTimeout(onDone, 400);
+      return;
+    } catch (e) {}
   }
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(lang === "id" ? textId : (textEn || textId));
-  u.lang = lang === "id" ? "id-ID" : "en-US";
-  u.rate = 0.92; u.pitch = 1.15;
-  let selesai = false;
-  const lanjut = () => { if (!selesai) { selesai = true; if (onDone) setTimeout(onDone, 1200); } };
-  u.onend = lanjut;
-  u.onerror = lanjut;
-  setTimeout(lanjut, 4000);
-  window.speechSynthesis.speak(u);
+
+  if ("speechSynthesis" in window) {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(teks);
+    u.lang = kodeBahasa;
+    u.rate = 1.05;
+    u.pitch = 1.48;
+    u.onend = () => { if (onDone) setTimeout(onDone, 500); };
+    window.speechSynthesis.speak(u);
+  } else if (onDone) {
+    setTimeout(onDone, 1800);
+  }
+}
+
+function playWinMelody() {
+  const nada = new Array(523, 659, 784, 1046);
+  nada.forEach((f, idx) => {
+    setTimeout(() => playTone(f, "triangle", 0.16), idx * 95);
+  });
 }
 
 function showView(name) {
@@ -152,12 +169,10 @@ function nextQuestion() {
         b.style.borderColor = "#16a34a";
         score += 10;
         document.getElementById("quiz-score").innerText = score;
-        playTone(880, "sine", 0.2);
+        playWinMelody();
         setTimeout(() => {
-          speakText("Hebat, benar!", "Awesome!"); setTimeout(() => {
-            setTimeout(nextQuestion, 1400);
-          });
-        }, 220);
+          speakText("Yeeey! Pintar sekali!", "Yay! You are so smart!", nextQuestion);
+        }, 420);
       } else {
         playTone(220, "sawtooth", 0.22);
         speakText("Ups, coba lagi ya!", "Oops, try again!");
