@@ -1,1 +1,82 @@
-<h1>Belajar Seru Anak</h1>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Belajar Seru Anak: Huruf & Hewan</title>
+  <link rel="stylesheet" href="style.css?v=11">
+</head>
+<body>
+  <header class="top-bar">
+    <button id="btn-back" class="icon-btn hidden" aria-label="Kembali">🏠</button>
+    <div class="title-wrap">
+      <h1 id="header-title">Belajar Seru Anak</h1>
+      <small>Huruf &amp; Hewan • SuperG Studio</small>
+    </div>
+    <button id="btn-lang" class="lang-btn">🇮🇩 ID</button>
+  </header>
+
+  <main id="app">
+    <section id="view-home" class="view active">
+      <div class="hero-card">
+        <div class="mascot">🦁</div>
+        <h2>Halo Adik Pintar!</h2>
+        <p>Ayo bermain sambil belajar mengenal huruf, angka, hewan, dan warna!</p>
+      </div>
+      <div class="menu-grid">
+        <button class="menu-card c-huruf" data-mode="huruf">
+          <span class="m-ico">🔤</span>
+          <strong>Mengenal Huruf</strong>
+          <small>A sampai Z</small>
+        </button>
+        <button class="menu-card c-angka" data-mode="angka">
+          <span class="m-ico">🔢</span>
+          <strong>Mengenal Angka</strong>
+          <small>1 sampai 20</small>
+        </button>
+        <button class="menu-card c-hewan" data-mode="hewan">
+          <span class="m-ico">🐘</span>
+          <strong>Dunia Hewan</strong>
+          <small>Suara &amp; Nama</small>
+        </button>
+        <button class="menu-card c-warna" data-mode="warna">
+          <span class="m-ico">🎨</span>
+          <strong>Mengenal Warna</strong>
+          <small>Warna Ceria</small>
+        </button>
+      </div>
+      <button class="quiz-banner" data-mode="kuis">
+        <span class="q-ico">⭐</span>
+        <div>
+          <strong>Mini-Game Tebak Ceria</strong>
+          <small>Kumpulkan bintang sebanyak-banyaknya!</small>
+        </div>
+        <span class="q-go">▶️</span>
+      </button>
+    </section>
+
+    <section id="view-learn" class="view">
+      <div id="spotlight-card" class="spotlight">
+        <div id="spot-visual" class="spot-visual">🍎</div>
+        <h2 id="spot-title">A - Apel</h2>
+        <p id="spot-sub">Ketuk kartu di bawah untuk mendengar suaranya!</p>
+        <button id="btn-speak-again" class="speak-btn">🔊 Ulangi Suara</button>
+      </div>
+      <div id="cards-grid" class="cards-grid"></div>
+    </section>
+
+    <section id="view-quiz" class="view">
+      <div class="quiz-header">
+        <span class="star-pill">⭐ Bintang: <b id="quiz-score">0</b></span>
+        <button id="btn-quiz-sound" class="speak-btn mini">🔊 Dengar Soal</button>
+      </div>
+      <div class="quiz-question-box">
+        <h2 id="quiz-prompt">Yang mana gambar Kucing?</h2>
+      </div>
+      <div id="quiz-options" class="quiz-options"></div>
+    </section>
+  </main>
+
+  <script src="app.js?v=11"></script>
+</body>
+</html>
