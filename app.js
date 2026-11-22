@@ -6,19 +6,32 @@ let currentAnswer = null;
 
 const DATA = {
   huruf: [
-    { k: "A", ico: "🍎", id: "Apel", en: "Apple" }, { k: "B", ico: "🦆", id: "Bebek", en: "Duck" },
-    { k: "C", ico: "🦎", id: "Cicak", en: "Lizard" }, { k: "D", ico: "🐑", id: "Domba", en: "Sheep" },
-    { k: "E", ico: "🦅", id: "Elang", en: "Eagle" }, { k: "F", ico: "🦩", id: "Flamingo", en: "Flamingo" },
-    { k: "G", ico: "🐘", id: "Gajah", en: "Elephant" }, { k: "H", ico: "🐯", id: "Harimau", en: "Tiger" },
-    { k: "I", ico: "🐟", id: "Ikan", en: "Fish" }, { k: "J", ico: "🦒", id: "Jerapah", en: "Giraffe" },
-    { k: "K", ico: "🐱", id: "Kucing", en: "Cat" }, { k: "L", ico: "🐝", id: "Lebah", en: "Bee" },
-    { k: "M", ico: "🐒", id: "Monyet", en: "Monkey" }, { k: "N", ico: "🍍", id: "Nanas", en: "Pineapple" },
-    { k: "O", ico: "🦧", id: "Orangutan", en: "Orangutan" }, { k: "P", ico: "🐧", id: "Penguin", en: "Penguin" },
-    { k: "Q", ico: "👑", id: "Ratu", en: "Queen" }, { k: "R", ico: "🦌", id: "Rusa", en: "Deer" },
-    { k: "S", ico: "🐄", id: "Sapi", en: "Cow" }, { k: "T", ico: "🐢", id: "Kura-kura", en: "Turtle" },
-    { k: "U", ico: "🐍", id: "Ular", en: "Snake" }, { k: "V", ico: "🌋", id: "Gunung Api", en: "Volcano" },
-    { k: "W", ico: "🥕", id: "Wortel", en: "Carrot" }, { k: "X", ico: "🎹", id: "Xilofon", en: "Xylophone" },
-    { k: "Y", ico: "🪀", id: "Yoyo", en: "Yoyo" }, { k: "Z", ico: "🦓", id: "Zebra", en: "Zebra" }
+    { k: "A", ico: "🍎", icoEn: "🍎", id: "Apel", en: "Apple" },
+    { k: "B", ico: "🦆", icoEn: "🐻", id: "Bebek", en: "Bear" },
+    { k: "C", ico: "🦎", icoEn: "🐱", id: "Cicak", en: "Cat" },
+    { k: "D", ico: "🐑", icoEn: "🐶", id: "Domba", en: "Dog" },
+    { k: "E", ico: "🦅", icoEn: "🐘", id: "Elang", en: "Elephant" },
+    { k: "F", ico: "🦩", icoEn: "🐟", id: "Flamingo", en: "Fish" },
+    { k: "G", ico: "🐘", icoEn: "🦒", id: "Gajah", en: "Giraffe" },
+    { k: "H", ico: "🐯", icoEn: "🐴", id: "Harimau", en: "Horse" },
+    { k: "I", ico: "🐟", icoEn: "🍦", id: "Ikan", en: "Ice Cream" },
+    { k: "J", ico: "🦒", icoEn: "🪼", id: "Jerapah", en: "Jellyfish" },
+    { k: "K", ico: "🐱", icoEn: "🦘", id: "Kucing", en: "Kangaroo" },
+    { k: "L", ico: "🐝", icoEn: "🦁", id: "Lebah", en: "Lion" },
+    { k: "M", ico: "🐒", icoEn: "🐒", id: "Monyet", en: "Monkey" },
+    { k: "N", ico: "🍍", icoEn: "🪺", id: "Nanas", en: "Nest" },
+    { k: "O", ico: "🦧", icoEn: "🦉", id: "Orangutan", en: "Owl" },
+    { k: "P", ico: "🐧", icoEn: "🐧", id: "Penguin", en: "Penguin" },
+    { k: "Q", ico: "👑", icoEn: "👑", id: "Ratu", en: "Queen" },
+    { k: "R", ico: "🦌", icoEn: "🐰", id: "Rusa", en: "Rabbit" },
+    { k: "S", ico: "🐄", icoEn: "☀️", id: "Sapi", en: "Sun" },
+    { k: "T", ico: "🐢", icoEn: "🐯", id: "Kura-kura", en: "Tiger" },
+    { k: "U", ico: "🐍", icoEn: "☂️", id: "Ular", en: "Umbrella" },
+    { k: "V", ico: "🌋", icoEn: "🌋", id: "Gunung Api", en: "Volcano" },
+    { k: "W", ico: "🥕", icoEn: "🐳", id: "Wortel", en: "Whale" },
+    { k: "X", ico: "🎹", icoEn: "🎹", id: "Xilofon", en: "Xylophone" },
+    { k: "Y", ico: "🪀", icoEn: "🪀", id: "Yoyo", en: "Yoyo" },
+    { k: "Z", ico: "🦓", icoEn: "🦓", id: "Zebra", en: "Zebra" }
   ],
   angka: Array.from({ length: 20 }, (_, i) => {
     const n = i + 1;
@@ -105,7 +118,7 @@ function openLearn(mode) {
     playTone(620, "triangle", 0.14);
     const spotEl = document.getElementById("spot-visual");
     spotEl.style.fontSize = item.isAngka ? (Number(item.k) > 10 ? "24px" : (Number(item.k) > 5 ? "30px" : "42px")) : "62px";
-    spotEl.innerText = item.ico;
+    const ikonAktif = (lang === "en" && item.icoEn) ? item.icoEn : item.ico; spotEl.innerText = ikonAktif;
     const judul = mode === "huruf" ? `${item.k} — ${lang === "id" ? item.id : item.en}` :
                   mode === "angka" ? `${item.k} (${lang === "id" ? item.id : item.en})` :
                   (lang === "id" ? item.id : item.en);
@@ -121,7 +134,7 @@ function openLearn(mode) {
     const btn = document.createElement("button");
     btn.className = "item-card";
     if (item.hex) btn.style.borderColor = item.hex;
-    btn.innerHTML = `<span class="ic-top">${mode === "huruf" || mode === "angka" ? item.k : item.ico}</span><strong>${mode === "huruf" ? item.ico + " " + (lang === "id" ? item.id : item.en) : (lang === "id" ? item.id : item.en)}</strong>`;
+    btn.innerHTML = `<span class="ic-top">${mode === "huruf" || mode === "angka" ? item.k : item.ico}</span><strong>${mode === "huruf" ? ((lang === "en" && item.icoEn) ? item.icoEn : item.ico) + " " + (lang === "id" ? item.id : item.en) : (lang === "id" ? item.id : item.en)}</strong>`;
     btn.onclick = () => setSpot(item);
     grid.appendChild(btn);
   });
