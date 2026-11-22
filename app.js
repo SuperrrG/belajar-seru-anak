@@ -64,28 +64,17 @@ function playTone(freq = 520, type = "sine", dur = 0.15) {
   } catch (e) {}
 }
 
-async function speakText(textId, textEn, onDone) {
+async async function speakText(textId, textEn, onDone) {
   lastSpoken = { id: textId, en: textEn || textId };
   const teks = lang === "id" ? textId : (textEn || textId);
   const kodeBahasa = lang === "id" ? "id-ID" : "en-US";
-  const capTTS = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.TextToSpeech;
-
-  if (capTTS) {
-    try {
-      await capTTS.stop().catch(() => {});
-      await capTTS.speak({ text: teks, lang: kodeBahasa, rate: 1.05, pitch: 1.48, volume: 1.0 });
-      if (onDone) setTimeout(onDone, 400);
-      return;
-    } catch (e) {}
-  }
-
   if ("speechSynthesis" in window) {
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(teks);
     u.lang = kodeBahasa;
     u.rate = 1.05;
     u.pitch = 1.48;
-    u.onend = () => { if (onDone) setTimeout(onDone, 500); };
+    u.onend = () => { if (onDone) setTimeout(onDone, 550); };
     window.speechSynthesis.speak(u);
   } else if (onDone) {
     setTimeout(onDone, 1800);
