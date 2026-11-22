@@ -140,48 +140,32 @@ function openLearn(mode, pageIdx = 0) {
   const allList = DATA[mode];
   const grid = document.getElementById("cards-grid");
 
-  let rangeWrap = document.getElementById("angka-range-tabs");
-  if (rangeWrap) rangeWrap.remove();
+  let oldPager = document.getElementById("angka-pager-bar");
+  if (oldPager) oldPager.remove();
 
-  let pagerWrap = document.getElementById("angka-pager-bar");
-  if (!pagerWrap) {
-    pagerWrap = document.createElement("div");
-    pagerWrap.id = "angka-pager-bar";
-    pagerWrap.className = "pager-bar";
-    grid.parentNode.appendChild(pagerWrap);
+  let rangeWrap = document.getElementById("angka-range-tabs");
+  if (!rangeWrap) {
+    rangeWrap = document.createElement("div");
+    rangeWrap.id = "angka-range-tabs";
+    rangeWrap.className = "range-tabs";
+    grid.parentNode.insertBefore(rangeWrap, grid);
   }
-  pagerWrap.innerHTML = "";
-  pagerWrap.style.display = "none";
+  rangeWrap.innerHTML = "";
+  rangeWrap.style.display = "none";
 
   let list = allList;
   if (mode === "angka") {
-    const perPage = 15;
-    const totalPages = Math.ceil(allList.length / perPage);
-    const safePage = Math.max(0, Math.min(pageIdx, totalPages - 1));
-    const start = safePage * perPage;
-    const end = Math.min(start + perPage, allList.length);
-    list = allList.slice(start, end);
-
-    pagerWrap.style.display = "flex";
-    const btnPrev = document.createElement("button");
-    btnPrev.className = "pager-btn";
-    btnPrev.innerText = lang === "id" ? "◀ Sebelumnya" : "◀ Prev";
-    btnPrev.disabled = safePage === 0;
-    btnPrev.onclick = () => openLearn("angka", safePage - 1);
-
-    const info = document.createElement("span");
-    info.className = "pager-info";
-    info.innerText = `${start + 1}–${end} (${safePage + 1}/${totalPages})`;
-
-    const btnNext = document.createElement("button");
-    btnNext.className = "pager-btn";
-    btnNext.innerText = lang === "id" ? "Selanjutnya ▶" : "Next ▶";
-    btnNext.disabled = safePage >= totalPages - 1;
-    btnNext.onclick = () => openLearn("angka", safePage + 1);
-
-    pagerWrap.appendChild(btnPrev);
-    pagerWrap.appendChild(info);
-    pagerWrap.appendChild(btnNext);
+    const ranges = [,,,,,,];
+    rangeWrap.style.display = "flex";
+    ranges.forEach((r, idx) => {
+      const tb = document.createElement("button");
+      tb.className = "range-btn" + (idx === pageIdx ? " active" : "");
+      tb.innerText = `${r}–${r}`;
+      tb.onclick = () => openLearn("angka", idx);
+      rangeWrap.appendChild(tb);
+    });
+    const [awal, akhir] = ranges[pageIdx] || ranges;
+    list = allList.slice(awal - 1, akhir);
   }
 
   const setSpot = (item, silent = false) => {
