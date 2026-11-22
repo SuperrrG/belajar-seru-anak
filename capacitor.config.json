@@ -1,0 +1,9 @@
+{
+  "appId": "com.supergstudio.belajarseruanak",
+  "appName": "Belajar Seru Anak",
+  "webDir": "www",
+  "server": {
+    "url": "https://github.io",
+    "cleartext": true
+  }
+}
